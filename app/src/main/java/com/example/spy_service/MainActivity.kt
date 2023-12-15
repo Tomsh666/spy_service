@@ -4,6 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.work.NetworkType
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,26 +18,26 @@ class MainActivity : AppCompatActivity() {
         val text: TextView = findViewById(R.id.textView)
         val stop_button:Button = findViewById(R.id.stop_button )
         val start_button:Button = findViewById(R.id.start_button)
-        var n : Boolean = false
         start_button.setOnClickListener(){
-            if(!n){
-                text.text = "Service is running"
-                n = true
-            }
-            else
-            {
-                text.text = "Service is already running"
-            }
+            startTask()
+            text.text = getString(R.string.running)
         }
         stop_button.setOnClickListener(){
-            if(n){
-                text.text = "Service is not running"
-                n = false
-            }
-            else
-            {
-                text.text = "Service is not running yet"
-            }
+            stopTask()
+            text.text = getString(R.string.not_running)
         }
     }
+    private fun startTask() {
+        val constrains = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val task = PeriodicWorkRequestBuilder<BackgroundSpyWorker>(
+            15, TimeUnit.MINUTES,
+            5, TimeUnit.MINUTES)
+            .addTag("SPYJOB")
+            .setConstraints(constrains)
+            .build()
+        WorkManager.getInstance()
+            .enqueueUniquePeriodicWork("spyJob", ExistingPeriodicWorkPolicy.KEEP, task)
+    }
+
+    private fun stopTask() = WorkManager.getInstance().cancelAllWorkByTag("SPYJOB")
 }

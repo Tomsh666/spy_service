@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">spy_service</string>
+    <string name="running">Service is running</string>
+    <string name="not_running">Service is not running</string>
 </resources>
