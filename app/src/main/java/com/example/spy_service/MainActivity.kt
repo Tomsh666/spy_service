@@ -15,9 +15,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,27 +83,28 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-//    private fun startTask() {
-//        val constrains = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-//        val task = PeriodicWorkRequestBuilder<BackgroundSpyWorker>(
-//            15, TimeUnit.MINUTES,
-//            5, TimeUnit.MINUTES)
-//            .addTag("SPYJOB")
-//            .setConstraints(constrains)
-//            .build()
-//            WorkManager.getInstance()
-//            .enqueueUniquePeriodicWork("SPYJOB", ExistingPeriodicWorkPolicy.KEEP, task)
-//    }
 
     private fun startTask() {
         val constrains = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        val task = OneTimeWorkRequestBuilder<BackgroundSpyWorker>()
+        val task = PeriodicWorkRequestBuilder<BackgroundSpyWorker>(
+            15, TimeUnit.MINUTES,
+            5, TimeUnit.MINUTES)
             .addTag("SPYJOB")
             .setConstraints(constrains)
             .build()
-
-        WorkManager.getInstance().enqueue(task)
+            WorkManager.getInstance()
+            .enqueueUniquePeriodicWork("SPYJOB", ExistingPeriodicWorkPolicy.KEEP, task)
     }
+
+//    private fun startTask() {
+//        val constrains = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+//        val task = OneTimeWorkRequestBuilder<BackgroundSpyWorker>()
+//            .addTag("SPYJOB")
+//            .setConstraints(constrains)
+//            .build()
+//
+//        WorkManager.getInstance().enqueue(task)
+//    }
 
     private fun stopTask() = WorkManager.getInstance().cancelAllWorkByTag("SPYJOB")
 }
